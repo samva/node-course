@@ -1,8 +1,34 @@
-const express = require('express')
-const app = express()
-const port = 3000
+const Koa = require('koa');
+const Router = require('koa-router');
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.get('/', (req, res) => res.send('Hello World!'))
+const app = new Koa();
+const router = new Router();
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+router
+    .get('/', (ctx, next) => {
+        console.log(ctx);
+        ctx.body = 'Hello, world from koa-router';
+    })
+    .post('/users', async (ctx, next) => {
+        let arr = [];
+
+        await new Promise( (resolve, reject) => {
+            ctx.req.on('data', data => {
+                arr.push(data);
+            });
+            ctx.req.on('end', () => {
+                console.log(arr)
+                console.log(JSON.parse(arr))
+                ctx.body = JSON.parse(arr);
+                resolve();
+            });
+        });
+    });
+
+app
+    .use(router.routes())
+    .use(router.allowedMethods());
+
+app.listen(3000, () => {
+    console.log('started...');
+});
