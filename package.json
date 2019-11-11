@@ -1,10 +1,11 @@
 {
-  "name": "lesson-1-express",
+  "name": "koa-hello-world",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --exit",
+    "start": "nodemon app.js"
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +15,14 @@
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
     "minimist": "^1.2.0",
+    "node": "^12.13.0",
     "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "livr": "^2.3.0",
+    "mocha": "^6.2.2",
+    "nodemon": "^1.19.4",
+    "supertest": "^4.0.2"
   }
 }
