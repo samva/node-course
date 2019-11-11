@@ -14,15 +14,9 @@ class DB {
         }
         const dbFilename = path.join(dbRootDir, 'db.json');
         if (!fs.existsSync(dbFilename)) {
-            fs.writeFileSync(dbFilename, JSON.stringify({ sequence: 0, data: [] }));
+            fs.writeFileSync(dbFilename, JSON.stringify({ sequence: 0, items: [] }));
         }
         this.dbFilename = dbFilename;
-    }
-
-    async getItems() {
-        const { data } = await this.readDb();
-
-        return data;
     }
 
     async readDb() {
@@ -30,22 +24,44 @@ class DB {
         return JSON.parse(content.toString());
     }
 
+    async writeDb(items, sequence) {
+        await writeFileAsync(this.dbFilename, JSON.stringify({ sequence, items }));
+    }
+
+    async getItems() {
+        const { items } = await this.readDb();
+
+        return items;
+    }
+
+    async getItem(id) {
+        const { items } = await this.readDb();
+
+        return items.filter(product => product.id === id)[0];
+    };
+
     async createItem({ price, name }) {
-        const { sequence, data } = await this.readDb();
+        const { items, sequence } = await this.readDb();
         const id = sequence + 1;
 
-        data.push({ id, name, price });
-
-        await writeFileAsync(this.dbFilename, JSON.stringify({ sequence: id, data }));
+        items.push({ id, name, price });
+        await this.writeDb(items, id);
 
         return id;
     }
 
-    async deleteItem(id) {
-        const { sequence, data } = await this.readDb();
+    async updateItem(id, props) {
+        const { sequence, items: currentItems } = await this.readDb();
+        const items = currentItems.map(product => product.id === id ? { id, ...props } : product);
 
-        let newData = data.filter(product => product.id !== id);
-        await writeFileAsync(this.dbFilename, JSON.stringify({ sequence, data: newData }));
+        await this.writeDb(items, sequence);
+    };
+
+    async deleteItem(id) {
+        const { itmes: currentItems, sequence } = await this.readDb();
+        let items = currentItems.filter(product => product.id !== id);
+
+        await this.writeDb(items, sequence);
     }
 }
 

@@ -1,5 +1,6 @@
 const livr = require('livr');
-const db = require('./../db');
+const DB = require('./../initializers/db');
+const db = new DB();
 
 livr.Validator.defaultAutoTrim(true);
 
@@ -9,28 +10,28 @@ const itemIdValidator = new livr.Validator({
 
 
 const itemsController = {
-    getItems(ctx, next) {
-        ctx.body = db.getItems();
+    async getItems(ctx, next) {
+        ctx.body = await db.getItems()
     },
-    getItem(ctx, next) {
-         ctx.body = db.getItem(Number(ctx.params.id));
+    async getItem(ctx, next) {
+         ctx.body = await db.getItem(Number(ctx.params.id));
     },
-    createItem(ctx, next) {
+    async createItem(ctx, next) {
         if (ctx.headers.authorization !== 'admin') {
             ctx.body = 'not allowed';
             ctx.status = 401;
             
             return ;
         }
-        db.writeItem(ctx.request.body);
+        await db.createItem(ctx.request.body);
         ctx.body = 'created item';
     },
-    deleteItem(ctx, next) {
+    async deleteItem(ctx, next) {
         db.deleteItem(Number(ctx.params.itemId));
         ctx.status = 204;
         ctx.body = 'deleted';
     },
-    updateItem(ctx, next) {
+    async updateItem(ctx, next) {
         const validationResult = itemIdValidator.validate({
             itemId: ctx.params.itemId
         });
@@ -41,7 +42,7 @@ const itemsController = {
             return ;
         }
 
-        db.updateItem(Number(ctx.params.itemId), ctx.request.body);
+        await db.updateItem(Number(ctx.params.itemId), ctx.request.body);
         ctx.status = 201;
         ctx.body = 'updated';
     },
